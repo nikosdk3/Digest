@@ -17,6 +17,7 @@
       ],
       "deny": []
     },
+    "dialog:default",
     "dialog:default"
   ]
 }

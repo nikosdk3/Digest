@@ -1,7 +1,11 @@
+import { Book } from './book';
+import { SystemSettings } from './settings';
+
 export type BaseDir = 'Books' | 'Settings' | 'Data' | 'Log' | 'Cache' | 'None';
+export type ToastType = 'info' | 'warning' | 'error';
 
 export interface FileSystem {
-  readFile(fp: string, base: BaseDir, mode: 'text' | 'binary'): Promise<string | ArrayBuffer>;
+  readFile(path: string, base: BaseDir, mode: 'text' | 'binary'): Promise<string | ArrayBuffer>;
   writeFile(path: string, base: BaseDir, content: string | ArrayBuffer): Promise<void>;
   removeFile(path: string, base: BaseDir): Promise<void>;
   readDir(path: string, base: BaseDir): Promise<{ path: string; isDir: boolean }[]>;
@@ -12,4 +16,11 @@ export interface FileSystem {
 
 export interface AppService {
   fs: FileSystem;
+
+  loadSettings(): Promise<SystemSettings>;
+  saveSettings(settings: SystemSettings): Promise<void>;
+  selectDirectory(title: string): Promise<string | null>;
+  selectFiles(name: string, extensions: string[]): Promise<string[]>;
+  showMessage(msg: string, kind?: ToastType, title?: string, okLabel?: string): Promise<void>;
+  getCoverUrl(book: Book): string;
 }
