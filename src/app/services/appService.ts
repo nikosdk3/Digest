@@ -10,12 +10,22 @@ import {
   writeTextFile,
 } from '@tauri-apps/plugin-fs';
 import { AppService, BaseDir, ToastType } from '../types/system';
-import { appCacheDir, appConfigDir, appDataDir, appLogDir } from '@tauri-apps/api/path';
+import {
+  appCacheDir,
+  appConfigDir,
+  appDataDir,
+  appLogDir,
+  documentDir,
+  join,
+} from '@tauri-apps/api/path';
 import { SystemSettings } from '../types/settings';
 import { message, open } from '@tauri-apps/plugin-dialog';
 import { Book } from '../types/book';
 import { convertFileSrc } from '@tauri-apps/api/core';
+import { type as osType } from '@tauri-apps/plugin-os';
 
+const IS_MOBILE = (await osType()) === 'ios' || (await osType()) === 'android';
+const BOOKS_SUBDIR = 'DigestLibrary/Books';
 let BOOKS_DIR: string;
 
 function resolvePath(
@@ -33,8 +43,8 @@ function resolvePath(
       return { baseDir: BaseDirectory.AppLog, fp, base, dir: appLogDir };
     case 'Books':
       return {
-        baseDir: BaseDirectory.Document,
-        fp: `${BOOKS_DIR}/${fp}`,
+        baseDir: IS_MOBILE ? BaseDirectory.AppData : BaseDirectory.Document,
+        fp: `${BOOKS_SUBDIR}/${fp}`,
         base,
         dir: () => new Promise((r) => r('')),
       };
@@ -107,8 +117,12 @@ export const appService: AppService = {
       const txt = await appService.fs.readFile(fp, base, 'text');
       settings = JSON.parse(txt as string);
     } catch {
+      const INIT_BOOKS_DIR = await join(
+        IS_MOBILE ? await appDataDir() : await documentDir(),
+        BOOKS_SUBDIR,
+      );
       settings = {
-        localBooksDir: '',
+        localBooksDir: INIT_BOOKS_DIR,
         globalReadSettings: {
           themeType: 'auto',
           fontFamily: '',
@@ -117,7 +131,7 @@ export const appService: AppService = {
           lineSpacing: 1.5,
         },
       };
-      await appService.fs.createDir(fp, base, true);
+      await appService.fs.createDir('', base, true);
       await appService.fs.writeFile(fp, base, JSON.stringify(settings));
     }
 
@@ -148,7 +162,22 @@ export const appService: AppService = {
   showMessage: async (msg: string, kind: ToastType = 'info', title?: string, okLabel?: string) => {
     await message(msg, { kind, title, okLabel });
   },
-  getCoverUrl: (book: Book) => {
+  loadLibraryBooks: async () => {
+    let books: Book[] = [];
+    try {
+      const txt = await appService.fs.readFile('books.json', 'Books', 'text');
+      books = JSON.parse(txt as string);
+    } catch {
+      await appService.fs.writeFile('books.json', 'Books', '[]');
+    }
+
+    books.forEach((book) => {
+      book.coverImageUrl = appService.generateCoverUrl(book);
+    });
+
+    return books;
+  },
+  generateCoverUrl: (book: Book) => {
     return convertFileSrc(`${BOOKS_DIR}/${book.id}/cover.png`);
   },
 };

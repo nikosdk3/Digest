@@ -7,17 +7,9 @@
   ],
   "permissions": [
     "core:default",
+    "os:default",
+    "log:default",
     "fs:default",
-    {
-      "identifier": "fs:scope-document-recursive",
-      "allow": [
-        {
-          "path": "$DOCUMENT/**/*"
-        }
-      ],
-      "deny": []
-    },
-    "dialog:default",
     "dialog:default"
   ]
 }

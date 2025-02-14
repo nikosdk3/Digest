@@ -22,5 +22,6 @@ export interface AppService {
   selectDirectory(title: string): Promise<string | null>;
   selectFiles(name: string, extensions: string[]): Promise<string[]>;
   showMessage(msg: string, kind?: ToastType, title?: string, okLabel?: string): Promise<void>;
-  getCoverUrl(book: Book): string;
+  loadLibraryBooks(): Promise<Book[]>;
+  generateCoverUrl(book: Book): string;
 }
