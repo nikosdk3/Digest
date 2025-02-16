@@ -1,8 +1,8 @@
 {
   "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
-  "productName": "digest",
+  "productName": "Digest",
   "version": "0.1.0",
-  "identifier": "com.tauri.dev",
+  "identifier": "com.nikos.digest",
   "build": {
     "frontendDist": "../out",
     "devUrl": "http://localhost:3000",
@@ -13,7 +13,7 @@
     "withGlobalTauri": true,
     "windows": [
       {
-        "title": "digest",
+        "title": "Digest",
         "width": 800,
         "height": 600,
         "resizable": true,

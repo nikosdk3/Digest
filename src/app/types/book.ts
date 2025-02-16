@@ -20,3 +20,10 @@ export interface BookNote {
   lastModified: string;
   removalTimestamp?: string;
 }
+
+export interface BooksGroup {
+  id: string;
+  name: string;
+  books: Book[];
+  lastUpdated: number;
+}

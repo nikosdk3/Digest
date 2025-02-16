@@ -20,13 +20,22 @@ import {
 } from '@tauri-apps/api/path';
 import { SystemSettings } from '../types/settings';
 import { message, open } from '@tauri-apps/plugin-dialog';
-import { Book } from '../types/book';
+import { Book, BooksGroup } from '../types/book';
 import { convertFileSrc } from '@tauri-apps/api/core';
 import { type as osType } from '@tauri-apps/plugin-os';
 
-const IS_MOBILE = (await osType()) === 'ios' || (await osType()) === 'android';
+const IS_MOBILE = osType() === 'ios' || osType() === 'android';
 const BOOKS_SUBDIR = 'DigestLibrary/Books';
 let BOOKS_DIR: string;
+
+const MOCK_BOOKS: Book[] = Array.from({ length: 14 }, (_, k) => ({
+  id: `book-${k}`,
+  format: 'EPUB',
+  title: `Book ${k}`,
+  author: `Author ${k}`,
+  lastUpdated: Date.now() - 1000000 * k,
+  coverImageUrl: `https://placehold.co/800?text=Book+${k}&font=roboto`,
+}));
 
 function resolvePath(
   fp: string,
@@ -81,7 +90,7 @@ export const appService: AppService = {
 
       await mkdir(fp, base && { baseDir, recursive });
     },
-    async removeDir(path: string, base: BaseDir, recursive?: boolean) {
+    async removeDir(path: string, base: BaseDir, recursive = false) {
       const { fp, baseDir } = resolvePath(path, base);
 
       await remove(fp, base && { baseDir, recursive });
@@ -129,8 +138,8 @@ export const appService: AppService = {
           fontSize: 1.0,
           wordSpacing: 0.16,
           lineSpacing: 1.5,
-        },
-      };
+        }
+      } as SystemSettings;
       await appService.fs.createDir('', base, true);
       await appService.fs.writeFile(fp, base, JSON.stringify(settings));
     }
@@ -140,7 +149,7 @@ export const appService: AppService = {
   },
   saveSettings: async (settings: SystemSettings) => {
     const { fp, base } = SETTINGS_PATH;
-    await appService.fs.createDir(fp, base, true);
+    await appService.fs.createDir('', base, true);
     await appService.fs.writeFile(fp, base, JSON.stringify(settings));
     BOOKS_DIR = settings.localBooksDir;
   },
@@ -175,7 +184,16 @@ export const appService: AppService = {
       book.coverImageUrl = appService.generateCoverUrl(book);
     });
 
-    return books;
+    books = [...books, ...MOCK_BOOKS];
+    const ungroupedBooks: BooksGroup[] = [
+      {
+        id: 'ungrouped',
+        name: 'Ungrouped',
+        books,
+        lastUpdated: Date.now(),
+      },
+    ];
+    return ungroupedBooks;
   },
   generateCoverUrl: (book: Book) => {
     return convertFileSrc(`${BOOKS_DIR}/${book.id}/cover.png`);

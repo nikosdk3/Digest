@@ -1,4 +1,4 @@
-import { Book } from './book';
+import { Book, BooksGroup } from './book';
 import { SystemSettings } from './settings';
 
 export type BaseDir = 'Books' | 'Settings' | 'Data' | 'Log' | 'Cache' | 'None';
@@ -22,6 +22,6 @@ export interface AppService {
   selectDirectory(title: string): Promise<string | null>;
   selectFiles(name: string, extensions: string[]): Promise<string[]>;
   showMessage(msg: string, kind?: ToastType, title?: string, okLabel?: string): Promise<void>;
-  loadLibraryBooks(): Promise<Book[]>;
+  loadLibraryBooks(): Promise<BooksGroup[]>;
   generateCoverUrl(book: Book): string;
 }
