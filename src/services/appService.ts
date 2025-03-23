@@ -22,9 +22,7 @@ import { SystemSettings } from '../types/settings';
 import { message, open } from '@tauri-apps/plugin-dialog';
 import { Book, BooksGroup } from '../types/book';
 import { convertFileSrc } from '@tauri-apps/api/core';
-import { type as osType } from '@tauri-apps/plugin-os';
 
-const IS_MOBILE = osType() === 'ios' || osType() === 'android';
 const BOOKS_SUBDIR = 'DigestLibrary/Books';
 let BOOKS_DIR: string;
 
@@ -52,7 +50,7 @@ function resolvePath(
       return { baseDir: BaseDirectory.AppLog, fp, base, dir: appLogDir };
     case 'Books':
       return {
-        baseDir: IS_MOBILE ? BaseDirectory.AppData : BaseDirectory.Document,
+        baseDir: BaseDirectory.Document,
         fp: `${BOOKS_SUBDIR}/${fp}`,
         base,
         dir: () => new Promise((r) => r('')),
@@ -126,10 +124,8 @@ export const appService: AppService = {
       const txt = await appService.fs.readFile(fp, base, 'text');
       settings = JSON.parse(txt as string);
     } catch {
-      const INIT_BOOKS_DIR = await join(
-        IS_MOBILE ? await appDataDir() : await documentDir(),
-        BOOKS_SUBDIR,
-      );
+      const INIT_BOOKS_DIR = await join(await documentDir(), BOOKS_SUBDIR);
+      await appService.fs.createDir('', 'Books', true);
       settings = {
         localBooksDir: INIT_BOOKS_DIR,
         globalReadSettings: {
@@ -138,7 +134,7 @@ export const appService: AppService = {
           fontSize: 1.0,
           wordSpacing: 0.16,
           lineSpacing: 1.5,
-        }
+        },
       } as SystemSettings;
       await appService.fs.createDir('', base, true);
       await appService.fs.writeFile(fp, base, JSON.stringify(settings));

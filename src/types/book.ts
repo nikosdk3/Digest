@@ -27,3 +27,5 @@ export interface BooksGroup {
   books: Book[];
   lastUpdated: number;
 }
+
+export type LibraryItem = Book | BooksGroup;
