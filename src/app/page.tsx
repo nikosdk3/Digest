@@ -3,25 +3,17 @@
 import * as React from 'react';
 import { useState } from 'react';
 import { useEnv } from '../context/EnvContext';
-import { Book, BooksGroup } from '../types/book';
-import Image from 'next/image';
+import { Book } from '../types/book';
 import Navbar from '@/components/Navbar';
 import Spinner from '@/components/Spinner';
 import Bookshelf from '@/components/Bookshelf';
 
 type AppState = 'Init' | 'Loading' | 'Library' | 'Reader';
-type LibraryItem = Book | BooksGroup;
-
-const generateLibraryItems = (groups: BooksGroup[]): LibraryItem[] => {
-  const ungroupedBooks: Book[] = groups.find((group) => group.id === 'ungrouped')?.books || [];
-  const groupedBooks: BooksGroup[] = groups.filter((group) => group.id !== 'ungrouped');
-  return [...ungroupedBooks, ...groupedBooks].sort((a, b) => b.lastUpdated - a.lastUpdated);
-};
 
 const LibraryPage = () => {
   const { envConfig } = useEnv();
   const [appState, setAppState] = useState<AppState>('Init');
-  const [libraryItems, setLibraryItems] = useState<LibraryItem[]>([]);
+  const [libraryBooks, setLibraryBooks] = useState<Book[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
 
   React.useEffect(() => {
@@ -34,9 +26,7 @@ const LibraryPage = () => {
         appService
           .loadLibraryBooks()
           .then((libraryBooks) => {
-            const libraryItems = generateLibraryItems(libraryBooks);
-            console.log('Library items:', libraryItems);
-            setLibraryItems(libraryItems);
+            setLibraryBooks(libraryBooks);
             setAppState('Library');
             setLoading(false);
           })
@@ -60,7 +50,7 @@ const LibraryPage = () => {
       <div className='min-h-screen p-2 pt-16'>
         <div className='hero-content'>
           <Spinner loading={loading} />
-          <Bookshelf libraryItems={libraryItems} onImport={handleImport} />
+          <Bookshelf libraryBooks={libraryBooks} onImport={handleImport} />
         </div>
       </div>
     </div>
