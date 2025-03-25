@@ -14,12 +14,11 @@ const LibraryPage = () => {
   const { envConfig } = useEnv();
   const [appState, setAppState] = useState<AppState>('Init');
   const [libraryBooks, setLibraryBooks] = useState<Book[]>([]);
-  const [loading, setLoading] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(true);
 
   React.useEffect(() => {
     if (appState !== 'Init') return;
     setAppState('Loading');
-    setLoading(true);
     envConfig.appService().then((appService) => {
       appService.loadSettings().then((settings) => {
         console.log('Settings', settings);
@@ -42,9 +41,12 @@ const LibraryPage = () => {
   const handleImportBooks = async () => {
     console.log('Importing books...');
     const appService = await envConfig.appService();
-    appService.selectFiles('Select Books', ['epub', 'pdf']).then(async () => {
+    appService.selectFiles('Select Books', ['epub', 'pdf']).then(async (files) => {
       setLoading(true);
-      setLibraryBooks(libraryBooks);
+      for (const file of files) {
+        // TODO
+        setLibraryBooks(libraryBooks);
+      }
       setLoading(false);
     });
   };

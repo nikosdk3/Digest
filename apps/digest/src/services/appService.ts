@@ -1,111 +1,19 @@
-import {
-  BaseDirectory,
-  exists,
-  mkdir,
-  readDir,
-  readFile,
-  readTextFile,
-  remove,
-  writeFile,
-  writeTextFile,
-} from '@tauri-apps/plugin-fs';
-import { AppService, BaseDir, ToastType } from '../types/system';
-import {
-  appCacheDir,
-  appConfigDir,
-  appDataDir,
-  appLogDir,
-  documentDir,
-  join,
-} from '@tauri-apps/api/path';
+import { AppService, ToastType } from '../types/system';
+import { documentDir, join } from '@tauri-apps/api/path';
 import { SystemSettings } from '../types/settings';
 import { message, open } from '@tauri-apps/plugin-dialog';
-import { Book } from '../types/book';
+import { Book, BookFormat } from '../types/book';
 import { convertFileSrc } from '@tauri-apps/api/core';
 import { LOCAL_BOOKS_SUBDIR } from './constants';
+import { resolvePath, fileSystem } from './fileSystem';
+import { BookDoc } from '@/libs/document';
 
-let BOOKS_DIR: string;
-
-function resolvePath(
-  fp: string,
-  base: BaseDir,
-): { baseDir: number; base: BaseDir; fp: string; dir: () => Promise<string> } {
-  switch (base) {
-    case 'Settings':
-      return { baseDir: BaseDirectory.AppConfig, fp, base, dir: appConfigDir };
-    case 'Data':
-      return { baseDir: BaseDirectory.AppData, fp, base, dir: appDataDir };
-    case 'Cache':
-      return { baseDir: BaseDirectory.AppCache, fp, base, dir: appCacheDir };
-    case 'Log':
-      return { baseDir: BaseDirectory.AppLog, fp, base, dir: appLogDir };
-    case 'Books':
-      return {
-        baseDir: BaseDirectory.Document,
-        fp: `${LOCAL_BOOKS_SUBDIR}/${fp}`,
-        base,
-        dir: () => new Promise((r) => r('')),
-      };
-    default:
-      return { baseDir: BaseDirectory.Temp, fp, base, dir: () => new Promise((r) => r('')) };
-  }
-}
+let BOOKS_DIR = '';
 
 const SETTINGS_PATH = resolvePath('settings.json', 'Settings');
 
 export const appService: AppService = {
-  fs: {
-    async readFile(path: string, base: BaseDir, mode: 'text' | 'binary') {
-      const { fp, baseDir } = resolvePath(path, base);
-
-      return mode === 'text'
-        ? (readTextFile(fp, base && { baseDir }) as Promise<string>)
-        : ((await readFile(fp, base && { baseDir })).buffer as ArrayBuffer);
-    },
-    async writeFile(path: string, base: BaseDir, content: string | ArrayBuffer) {
-      const { fp, baseDir } = resolvePath(path, base);
-
-      return typeof content === 'string'
-        ? writeTextFile(fp, content, base && { baseDir })
-        : await writeFile(fp, new Uint8Array(content), base && { baseDir });
-    },
-    async removeFile(path: string, base: BaseDir) {
-      const { fp, baseDir } = resolvePath(path, base);
-
-      return remove(fp, base && { baseDir });
-    },
-    async createDir(path: string, base: BaseDir, recursive = false) {
-      const { fp, baseDir } = resolvePath(path, base);
-
-      await mkdir(fp, base && { baseDir, recursive });
-    },
-    async removeDir(path: string, base: BaseDir, recursive = false) {
-      const { fp, baseDir } = resolvePath(path, base);
-
-      await remove(fp, base && { baseDir, recursive });
-    },
-    async readDir(path: string, base: BaseDir) {
-      const { fp, baseDir } = resolvePath(path, base);
-
-      const list = await readDir(fp, base && { baseDir });
-      return list.map((entity) => {
-        return {
-          path: entity.name,
-          isDir: entity.isDirectory,
-        };
-      });
-    },
-    async exists(path: string, base: BaseDir) {
-      const { fp, baseDir } = resolvePath(path, base);
-
-      try {
-        const res = await exists(fp, base && { baseDir });
-        return res;
-      } catch {
-        return false;
-      }
-    },
-  },
+  fs: fileSystem,
   loadSettings: async () => {
     let settings: SystemSettings;
     const { fp, base } = SETTINGS_PATH;
@@ -158,6 +66,21 @@ export const appService: AppService = {
   showMessage: async (msg: string, kind: ToastType = 'info', title?: string, okLabel?: string) => {
     await message(msg, { kind, title, okLabel });
   },
+  importBook: async (file: string | File, books: Book[], overwrite: boolean = false): Promise<Book[]> => {
+    try {
+      let loadedBook: BookDoc;
+      let format: BookFormat;
+      let filename: string; 
+      let fileobj: File;
+
+      try {
+        if (typeof file === 'string') {
+          filename = file;
+          fileobj = await new RemoteFile
+        }
+      }
+    }
+  }
   loadLibraryBooks: async () => {
     let books: Book[] = [];
     try {

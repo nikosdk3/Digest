@@ -23,6 +23,15 @@ export interface BookNote {
   removalTimestamp?: string;
 }
 
+export interface BookConfig {
+  lastUpdated: number;
+  remoteProgress: number;
+  localProgress: number;
+  bookmarks: BookNote[];
+  annotations: BookNote[];
+  removedNotesTimestamps?: Record<string, number>;
+}
+
 export interface BooksGroup {
   name: string;
   books: Book[];
