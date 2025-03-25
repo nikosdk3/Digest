@@ -1,43 +1,18 @@
 {
-  "name": "digest",
-  "version": "0.1.0",
+  "name": "@digest/monorepo",
   "private": true,
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
-    "lint": "next lint",
-    "tauri": "tauri"
-  },
-  "dependencies": {
-    "@tauri-apps/api": "^2.4.0",
-    "@tauri-apps/plugin-dialog": "~2.2.0",
-    "@tauri-apps/plugin-fs": "^2.2.0",
-    "@tauri-apps/plugin-log": "^2.3.1",
-    "@tauri-apps/plugin-os": "~2.2.1",
-    "epubjs": "^0.3.93",
-    "js-md5": "^0.8.3",
-    "next": "15.2.3",
-    "react": "^19.0.0",
-    "react-dom": "^19.0.0",
-    "react-icons": "^5.5.0"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "tauri": "pnpm --filter @digest/digest-app tauri"
   },
   "devDependencies": {
     "@sindresorhus/tsconfig": "^7.0.0",
-    "@tailwindcss/postcss": "^4.0.15",
-    "@tauri-apps/cli": "^2.4.0",
-    "@types/node": "^22.13.11",
-    "@types/react": "^19.0.12",
-    "@types/react-dom": "^19.0.4",
-    "autoprefixer": "^10.4.21",
     "cross-env": "^7.0.3",
-    "daisyui": "^5.0.9",
-    "eslint-config-next": "15.2.3",
+    "eslint": "^9.23.0",
     "eslint-config-prettier": "^10.1.1",
-    "postcss": "^8.5.3",
+    "husky": "^9.1.7",
     "prettier": "^3.5.3",
     "prettier-plugin-tailwindcss": "^0.6.11",
-    "tailwindcss": "^4.0.15",
     "typescript": "^5.8.2"
   }
 }
