@@ -68,13 +68,13 @@ export class DocumentLoader {
 
   private isCBZ(): boolean {
     return (
-      this.file.type === 'application/vnd.comicbook+zip' || this.file.name.endsWith(`${EXTS.CBZ}`)
+      this.file.type === 'application/vnd.comicbook+zip' || this.file.name.endsWith(`.${EXTS.CBZ}`)
     );
   }
 
   private isFB2(): boolean {
     return (
-      this.file.type === 'application/x-fictionbook+xml' || this.file.name.endsWith(`${EXTS.FB2}`)
+      this.file.type === 'application/x-fictionbook+xml' || this.file.name.endsWith(`.${EXTS.FB2}`)
     );
   }
 
@@ -82,7 +82,7 @@ export class DocumentLoader {
     return (
       this.file.type === 'application/x-zip-compressed-fb2' ||
       this.file.name.endsWith('.fb2.zip') ||
-      this.file.name.endsWith(`${EXTS.FBZ }`)
+      this.file.name.endsWith(`.${EXTS.FBZ}`)
     );
   }
 
@@ -101,7 +101,7 @@ export class DocumentLoader {
         book = makeComicBook(loader, this.file);
         format = 'CBZ';
       } else if (this.isFBZ()) {
-        const entry = entries.find((entry) => entry.filename.endsWith(`${EXTS.FBZ}`));
+        const entry = entries.find((entry) => entry.filename.endsWith(`.${EXTS.FBZ}`));
         const blob = await loader.loadBlob((entry ?? entries[0]!).filename);
         const { makeFB2 } = await import('foliate-js/fb2.js');
         book = await makeFB2(blob);

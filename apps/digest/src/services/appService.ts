@@ -2,11 +2,22 @@ import { AppService, ToastType } from '../types/system';
 import { documentDir, join } from '@tauri-apps/api/path';
 import { SystemSettings } from '../types/settings';
 import { message, open } from '@tauri-apps/plugin-dialog';
-import { Book, BookFormat } from '../types/book';
+import { Book, BookConfig, BookFormat } from '../types/book';
 import { convertFileSrc } from '@tauri-apps/api/core';
 import { LOCAL_BOOKS_SUBDIR } from './constants';
 import { resolvePath, fileSystem } from './fileSystem';
-import { BookDoc } from '@/libs/document';
+import { BookDoc, DocumentLoader } from '@/libs/document';
+import { RemoteFile } from '@/utils/file';
+import {
+  getBaseFilename,
+  getConfigFilename,
+  getCoverFilename,
+  getDir,
+  getFilename,
+  getLibraryFilename,
+  INIT_BOOK_CONFIG,
+} from '@/utils/book';
+import { partialMD5 } from '@/utils/md5';
 
 let BOOKS_DIR = '';
 
@@ -66,37 +77,102 @@ export const appService: AppService = {
   showMessage: async (msg: string, kind: ToastType = 'info', title?: string, okLabel?: string) => {
     await message(msg, { kind, title, okLabel });
   },
-  importBook: async (file: string | File, books: Book[], overwrite: boolean = false): Promise<Book[]> => {
+  importBook: async (
+    file: string | File,
+    books: Book[],
+    overwrite: boolean = false,
+  ): Promise<Book[]> => {
     try {
       let loadedBook: BookDoc;
       let format: BookFormat;
-      let filename: string; 
+      let filename: string;
       let fileobj: File;
 
       try {
         if (typeof file === 'string') {
           filename = file;
-          fileobj = await new RemoteFile
+          fileobj = await new RemoteFile(appService.fs.getURL(file), file).open();
+        } else {
+          filename = file.name;
+          fileobj = file;
+        }
+        ({ book: loadedBook, format } = await new DocumentLoader(fileobj).open());
+        if (!loadedBook.metadata.title) {
+          loadedBook.metadata.title = getBaseFilename(filename);
+        }
+      } catch (error) {
+        console.error(error);
+        throw new Error(`Failed to open the book: ${(error as Error).message || error}`);
+      }
+
+      const hash = await partialMD5(fileobj);
+      const existingBook = books.find((book) => book.hash === hash);
+      if (existingBook) {
+        if (existingBook.isRemoved) {
+          delete existingBook.isRemoved;
+        }
+        existingBook.lastUpdated = Date.now();
+      }
+
+      const book: Book = {
+        hash,
+        format,
+        title: loadedBook.metadata.title,
+        author: loadedBook.metadata.author,
+        lastUpdated: Date.now(),
+      };
+      book.coverImageUrl = appService.getCoverImageURL(book);
+
+      if (!(await appService.fs.exists(getDir(book), 'Books'))) {
+        await appService.fs.createDir(getDir(book), 'Books');
+      }
+      if (!(await appService.fs.exists(getFilename(book), 'Books')) || overwrite) {
+        const cover = await loadedBook.getCover();
+        if (cover) {
+          await appService.fs.writeFile(getCoverFilename(book), 'Books', await cover.arrayBuffer());
         }
       }
+
+      if (!existingBook) {
+        await appService.saveBookConfig(book, INIT_BOOK_CONFIG);
+        books.splice(0, 0, book);
+      }
+    } catch (error) {
+      throw error;
     }
-  }
+    return books;
+  },
+  loadBookConfig: async (book: Book): Promise<BookConfig> => {
+    try {
+      const str = await appService.fs.readFile(getConfigFilename(book), 'Books', 'text');
+      return JSON.parse(str as string);
+    } catch {
+      return INIT_BOOK_CONFIG;
+    }
+  },
+  saveBookConfig: async (book: Book, config: BookConfig) => {
+    await appService.fs.writeFile(getConfigFilename(book), 'Books', JSON.stringify(config));
+  },
   loadLibraryBooks: async () => {
     let books: Book[] = [];
+    const libraryFilename = getLibraryFilename();
     try {
-      const txt = await appService.fs.readFile('books.json', 'Books', 'text');
+      const txt = await appService.fs.readFile(libraryFilename, 'Books', 'text');
       books = JSON.parse(txt as string);
     } catch {
-      await appService.fs.writeFile('books.json', 'Books', '[]');
+      await appService.fs.writeFile(libraryFilename, 'Books', '[]');
     }
 
     books.forEach((book) => {
-      book.coverImageUrl = appService.generateCoverUrl(book);
+      book.coverImageUrl = appService.getCoverImageURL(book);
     });
 
     return books;
   },
-  generateCoverUrl: (book: Book) => {
+  saveLibraryBooks: async (books: Book[]) => {
+    await appService.fs.writeFile(getLibraryFilename(), 'Books', JSON.stringify(books));
+  },
+  getCoverImageURL: (book: Book) => {
     return convertFileSrc(`${BOOKS_DIR}/${book.hash}/cover.png`);
   },
 };

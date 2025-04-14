@@ -44,7 +44,7 @@ const LibraryPage = () => {
     appService.selectFiles('Select Books', ['epub', 'pdf']).then(async (files) => {
       setLoading(true);
       for (const file of files) {
-        // TODO
+        appService.importBook(file, libraryBooks);
         setLibraryBooks(libraryBooks);
       }
       setLoading(false);
@@ -55,7 +55,11 @@ const LibraryPage = () => {
     <div className='min-h-screen'>
       <Navbar onImportBooks={handleImportBooks} />
       <div className='min-h-screen p-2 pt-16'>
-        {libraryBooks.length === 0 ? (
+        <div className='hero-content'>
+          <Spinner loading={loading} />
+          <Bookshelf libraryBooks={libraryBooks} onImportBooks={handleImportBooks} />
+        </div>
+        {!loading && libraryBooks.length === 0 && (
           <div className='hero min-h-screen'>
             <div className='hero-content text-neutral-content text-center'>
               <div className='max-w-md'>
@@ -68,11 +72,6 @@ const LibraryPage = () => {
                 </button>
               </div>
             </div>
-          </div>
-        ) : (
-          <div className='hero-content'>
-            <Spinner loading={loading} />
-            <Bookshelf libraryBooks={libraryBooks} onImportBooks={handleImportBooks} />
           </div>
         )}
       </div>

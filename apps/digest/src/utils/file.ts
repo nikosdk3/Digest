@@ -1,3 +1,52 @@
+class RemoteBlobSlice extends Blob {
+  #dataPromise: Promise<ArrayBuffer>;
+  #type: string;
+
+  constructor(dataPromise: Promise<ArrayBuffer>, type: string) {
+    super();
+    this.#dataPromise = dataPromise;
+    this.#type = type;
+  }
+
+  override async arrayBuffer() {
+    const data = await this.#dataPromise;
+    return data;
+  }
+
+  override async text() {
+    const data = await this.#dataPromise;
+    return new TextDecoder().decode(data);
+  }
+
+  override stream() {
+    return new ReadableStream({
+      start: async (controller) => {
+        const data = await this.#dataPromise;
+        const reader = new ReadableStream({
+          start(controller) {
+            controller.enqueue(new Uint8Array(data));
+            controller.close();
+          },
+        }).getReader();
+        const pump = () =>
+          reader.read().then(({ done, value }): Promise<void> => {
+            if (done) {
+              controller.close();
+              return Promise.resolve();
+            }
+            controller.enqueue(value);
+            return pump();
+          });
+        return pump();
+      },
+    });
+  }
+
+  override get type() {
+    return this.#type;
+  }
+}
+
 export class RemoteFile extends File {
   url: string;
   #name: string;
@@ -55,7 +104,44 @@ export class RemoteFile extends File {
     return response.arrayBuffer();
   }
 
-  async fetchRange(start: number, end: number): Promise<ArrayBuffer>;
+  async fetchRange(start: number, end: number): Promise<ArrayBuffer> {
+    const rangeSize = end - start + 1;
+    const MAX_RANGE_LEN = 1024 * 1000;
+
+    if (rangeSize > MAX_RANGE_LEN) {
+      const buffers: ArrayBuffer[] = [];
+      for (let currentStart = start; currentStart <= end; currentStart += MAX_RANGE_LEN) {
+        const currentEnd = Math.min(end, currentStart + MAX_RANGE_LEN - 1);
+        buffers.push(await this.fetchRangePart(currentStart, currentEnd));
+      }
+      const totalSize = buffers.reduce((sum, buffer) => sum + buffer.byteLength, 0);
+      const combinedBuffer = new Uint8Array(totalSize);
+      let offset = 0;
+      for (const buffer of buffers) {
+        combinedBuffer.set(new Uint8Array(buffer), offset);
+        offset += buffer.byteLength;
+      }
+      return combinedBuffer.buffer;
+    } else if (rangeSize > RemoteFile.MAX_CACHE_CHUNK_SIZE) {
+      return this.fetchRangePart(start, end);
+    } else {
+      let cachedChunkStart = Array.from(this.#cache.keys()).find((chunkStart) => {
+        const buffer = this.#cache.get(chunkStart)!;
+        const bufferSize = buffer.byteLength;
+        return start >= chunkStart && end <= chunkStart + bufferSize;
+      });
+      if (cachedChunkStart !== undefined) {
+        this.#updateAccessOrder(cachedChunkStart);
+        const buffer = this.#cache.get(cachedChunkStart)!;
+        const offset = start - cachedChunkStart;
+        return buffer.slice(offset, offset + rangeSize);
+      }
+      cachedChunkStart = await this.#fetchAndCacheChunk(start, end);
+      const buffer = this.#cache.get(cachedChunkStart)!;
+      const offset = (start = cachedChunkStart);
+      return buffer.slice(offset, offset + rangeSize);
+    }
+  }
 
   async #fetchAndCacheChunk(start: number, end: number): Promise<number> {
     const chunkStart = Math.max(0, start - 1024);
@@ -81,5 +167,20 @@ export class RemoteFile extends File {
         this.#cache.delete(oldestKey);
       }
     }
+  }
+
+  override slice(start = 0, end = this.size, contentType = this.type): Blob {
+    const dataPromise = this.fetchRange(start, end);
+    return new RemoteBlobSlice(dataPromise, contentType);
+  }
+
+  override async text() {
+    const blob = this.slice(0, this.size);
+    return blob.text();
+  }
+
+  override async arrayBuffer() {
+    const blob = this.slice(0, this.size);
+    return blob.arrayBuffer();
   }
 }
