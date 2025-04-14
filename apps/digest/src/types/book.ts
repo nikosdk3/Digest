@@ -37,3 +37,9 @@ export interface BooksGroup {
   books: Book[];
   lastUpdated: number;
 }
+
+export interface BookContent {
+  book: Book;
+  file: File;
+  config: BookConfig;
+}

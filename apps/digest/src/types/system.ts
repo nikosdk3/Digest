@@ -1,4 +1,4 @@
-import { Book, BookConfig } from './book';
+import { Book, BookConfig, BookContent } from './book';
 import { SystemSettings } from './settings';
 
 export type BaseDir = 'Books' | 'Settings' | 'Data' | 'Log' | 'Cache' | 'None';
@@ -19,15 +19,16 @@ export interface FileSystem {
 export interface AppService {
   fs: FileSystem;
 
-  loadSettings(): Promise<SystemSettings>;
-  saveSettings(settings: SystemSettings): Promise<void>;
-  selectDirectory(title: string): Promise<string | null>;
+  selectDirectory(title: string): Promise<string>;
   selectFiles(name: string, extensions: string[]): Promise<string[]>;
   showMessage(msg: string, kind?: ToastType, title?: string, okLabel?: string): Promise<void>;
 
+  loadSettings(): Promise<SystemSettings>;
+  saveSettings(settings: SystemSettings): Promise<void>;
   importBook(file: string | File, books: Book[], overwrite?: boolean): Promise<Book[]>;
   loadBookConfig(book: Book): Promise<BookConfig>;
   saveBookConfig(book: Book, config: BookConfig): Promise<void>;
+  loadBookContent(book: Book): Promise<BookContent>;
   loadLibraryBooks(): Promise<Book[]>;
   saveLibraryBooks(books: Book[]): Promise<void>;
   getCoverImageURL(book: Book): string;
