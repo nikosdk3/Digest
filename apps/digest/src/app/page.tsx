@@ -1,24 +1,25 @@
 'use client';
 
 import * as React from 'react';
-import { useState } from 'react';
+import { useState, useRef } from 'react';
+
 import { useEnv } from '../context/EnvContext';
 import { Book } from '../types/book';
-import Navbar from '@/components/Navbar';
+
+import Navbar from '@/components/SearchBar';
 import Spinner from '@/components/Spinner';
 import Bookshelf from '@/components/Bookshelf';
-
-type AppState = 'Init' | 'Loading' | 'Library' | 'Reader';
+import SearchBar from '@/components/SearchBar';
 
 const LibraryPage = () => {
   const { envConfig } = useEnv();
-  const [appState, setAppState] = useState<AppState>('Init');
   const [libraryBooks, setLibraryBooks] = useState<Book[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
+  const isInitiating = useRef(false);
 
   React.useEffect(() => {
-    if (appState !== 'Init') return;
-    setAppState('Loading');
+    if (isInitiating.current) return;
+    isInitiating.current = true;
     envConfig.appService().then((appService) => {
       appService.loadSettings().then((settings) => {
         console.log('Settings', settings);
@@ -26,7 +27,6 @@ const LibraryPage = () => {
           .loadLibraryBooks()
           .then((libraryBooks) => {
             setLibraryBooks(libraryBooks);
-            setAppState('Library');
             setLoading(false);
           })
           .catch((err) => {
@@ -36,7 +36,7 @@ const LibraryPage = () => {
           });
       });
     });
-  }, [envConfig, appState]);
+  }, [envConfig]);
 
   const handleImportBooks = async () => {
     console.log('Importing books...');
@@ -53,7 +53,7 @@ const LibraryPage = () => {
 
   return (
     <div className='min-h-screen'>
-      <Navbar onImportBooks={handleImportBooks} />
+      <SearchBar onImportBooks={handleImportBooks} />
       <div className='min-h-screen p-2 pt-16'>
         <div className='hero-content'>
           <Spinner loading={loading} />

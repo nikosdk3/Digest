@@ -29,7 +29,7 @@ Map.groupBy = (iterable, callbackfn) => {
   return map;
 };
 
-type DocumentFile = File;
+export type DocumentFile = File;
 
 export interface BookDoc {
   metadata: {
@@ -51,9 +51,9 @@ export const EXTS: Record<BookFormat, string> = {
 };
 
 export class DocumentLoader {
-  private file: DocumentFile;
+  private file: File;
 
-  constructor(file: DocumentFile) {
+  constructor(file: File) {
     this.file = file;
   }
 

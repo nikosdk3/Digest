@@ -1,42 +1,25 @@
-import React from 'react';
-import { FaPlus, FaSearch } from 'react-icons/fa';
+'use client';
 
-interface NavbarProps {
-  onImportBooks: () => void;
+import React from 'react';
+import { FaChevronLeft } from 'react-icons/fa';
+
+interface NavBarProps {
+  onBack: () => void;
+  isVisible: boolean;
 }
 
-const Navbar: React.FC<NavbarProps> = ({ onImportBooks }) => {
+const NavBar: React.FC<NavBarProps> = ({ onBack, isVisible }) => {
   return (
-    <div className='fixed z-10 w-full p-6'>
-      <div className='flex items-center justify-between'>
-        {/* Search input with Maginfier and Plus Icon */}
-        <div className='relative flex w-full items-center'>
-          {/*MagnifierIcon*/}
-          <span className='absolute left-4 z-[1] text-gray-500'>
-            <FaSearch className='w-3' />
-          </span>
-          {/* Search input */}
-          <input
-            type='text'
-            placeholder='Search Books...'
-            className='input input-sm rounded-badge w-full pr-10 pl-10 focus:outline-none'
-          />
-          {/* Plus icon */}
-          <span className='dropdown dropdown-end absolute right-4 cursor-pointer text-gray-500'>
-            <FaPlus tabIndex={0} className='w-3' role='button' />
-            <ul
-              tabIndex={0}
-              className='menu dropdown-content rounded-box bg-base-100 z-[1] w-52 p-2 shadow'
-            >
-              <li>
-                <button onClick={onImportBooks}>From Local File</button>
-              </li>
-            </ul>
+    isVisible && (
+      <div className='fixed top-0 right-0 left-0 z-10 bg-gray-50 p-6'>
+        <div className='flex items-center justify-between'>
+          <span className='absolute left-2 text-gray-500' onClick={onBack}>
+            <FaChevronLeft className='w-10' />
           </span>
         </div>
       </div>
-    </div>
+    )
   );
 };
 
-export default Navbar;
+export default NavBar;
