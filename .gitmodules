@@ -1,6 +1,6 @@
-[submodule "foliate-js"]
-	path = foliate-js
-	url = https://github.com/johnfactotum/foliate-js.git
 [submodule "packages/foliate-js"]
 	path = packages/foliate-js
 	url = https://github.com/johnfactotum/foliate-js
+[submodule "packages/pdf.js"]
+	path = packages/pdf.js
+	url = https://github.com/mozilla/pdf.js
