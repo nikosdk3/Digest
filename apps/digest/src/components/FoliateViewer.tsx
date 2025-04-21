@@ -2,7 +2,7 @@ import { BookDoc } from '@/libs/document';
 import { useEffect, useRef } from 'react';
 
 interface FoliateViewerProps {
-  book: BookDoc | null;
+  book: BookDoc;
 }
 
 const getCSS = (spacing: number, justify: boolean, hyphenate: boolean) => `
@@ -44,6 +44,15 @@ const getCSS = (spacing: number, justify: boolean, hyphenate: boolean) => `
     }
 `;
 
+interface FoliateView extends HTMLElement {
+  open: (book: BookDoc) => Promise<void>;
+  renderer: {
+    setStyles: (css: string) => void;
+    next: () => Promise<void>;
+    prev: () => Promise<void>;
+  };
+}
+
 const FoliateViewer: React.FC<FoliateViewerProps> = ({ book }) => {
   const viewRef = useRef<HTMLDivElement>(null);
   const isViewCreated = useRef(false);
@@ -52,7 +61,7 @@ const FoliateViewer: React.FC<FoliateViewerProps> = ({ book }) => {
     if (isViewCreated.current) return;
     const openBook = async () => {
       await import('foliate-js/view.js');
-      const view = document.createElement('foliate-view');
+      const view = document.createElement('foliate-view') as FoliateView;
       document.body.append(view);
       viewRef.current?.appendChild(view);
 
@@ -74,7 +83,7 @@ const FoliateViewer: React.FC<FoliateViewerProps> = ({ book }) => {
     const leftThreshold = width * 0.5;
     const rightThreshold = width * 0.5;
 
-    const existingView = viewRef.current?.querySelector('foliate-view');
+    const existingView = viewRef.current?.querySelector('foliate-view') as FoliateView;
     if (clientX < leftThreshold) {
       existingView?.renderer?.prev();
     } else if (clientX > rightThreshold) {
