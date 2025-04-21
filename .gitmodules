@@ -1,0 +1,6 @@
+[submodule "packages/foliate-js"]
+	path = packages/foliate-js
+	url = git@github.com:johnfactotum/foliate-js.git
+[submodule "packages/pdf.js"]
+	path = packages/pdf.js
+	url = git@github.com:mozilla/pdf.js.git
