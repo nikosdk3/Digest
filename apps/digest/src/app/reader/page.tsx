@@ -21,11 +21,17 @@ const ReaderPage = () => {
 
   useEffect(() => {
     envConfig.appService().then((appService) => {
-      appService.loadSettings().then(() => {
-        if (id && !bookState.content) {
-          fetchBook(appService, id);
-        }
-      });
+      appService
+        .loadSettings()
+        .then(() => {
+          return id && !bookState.content ? fetchBook(appService, id) : null;
+        })
+        .then((book) => {
+          if (book) {
+            book.lastUpdated = Date.now();
+            appService.updateLibraryBook(book);
+          }
+        });
     });
   }, [id, fetchBook, bookState.content, envConfig]);
 
@@ -55,3 +61,5 @@ const ReaderPage = () => {
     </div>
   );
 };
+
+export default ReaderPage;

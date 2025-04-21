@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 
-import { BookContent, BookNote } from '@/types/book';
+import { Book, BookContent, BookNote } from '@/types/book';
 import { AppService } from '@/types/system';
 
 interface BookState {
@@ -12,7 +12,7 @@ interface BookState {
 
 interface ReaderStore {
   books: Record<string, BookState>;
-  fetchBook: (appService: AppService, id: string) => Promise<void>;
+  fetchBook: (appService: AppService, id: string) => Promise<Book | null>;
   addNote: (id: string, note: BookNote) => void;
 }
 
@@ -42,6 +42,7 @@ export const useReaderStore = create<ReaderStore>((set) => {
             [id]: { ...state.books[id], loading: false, content },
           },
         }));
+        return book;
       } catch (error) {
         console.error(error);
         set((state) => ({
@@ -50,19 +51,19 @@ export const useReaderStore = create<ReaderStore>((set) => {
             [id]: { ...state.books[id], loading: false, error: 'Failed to load book.' },
           },
         }));
+        return null;
       }
-
-      addNote: (id: string, note: BookNote) => {
-        set((state) => ({
-          books: {
-            ...state.books,
-            [id]: {
-              ...state.books[id],
-              notes: [...state.books[id]!.notes!, note],
-            },
-          },
-        }));
-      };
     },
+
+    addNote: (id: string, note: BookNote) =>
+      set((state) => ({
+        books: {
+          ...state.books,
+          [id]: {
+            ...state.books[id],
+            notes: [...state.books[id]!.notes!, note],
+          },
+        },
+      })),
   };
 });
