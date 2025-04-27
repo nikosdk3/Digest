@@ -9,7 +9,7 @@ import { useReaderStore } from '@/store/readerStore';
 import { BookDoc, DocumentLoader } from '@/libs/document';
 
 import FoliateViewer from './FoliateViewer';
-import Spinner from './Spinner';
+import Spinner from '@/components/Spinner';
 
 const ReaderContent = () => {
   const searchParams = useSearchParams();
@@ -22,12 +22,12 @@ const ReaderContent = () => {
 
   useEffect(() => {
     if (id && !bookState.content) {
-      envConfig.appService().then((appService) => {
+      envConfig.initAppService().then((appService) => {
         appService.loadSettings().then(() => {
           fetchBook(appService, id).then((book) => {
             if (book) {
               book.lastUpdated = Date.now();
-              appService.updateLibraryBook(book);
+              appService.updateLibraryBooks(book);
             }
           });
         });

@@ -31,6 +31,6 @@ export interface AppService {
   loadBookContent(book: Book): Promise<BookContent>;
   loadLibraryBooks(): Promise<Book[]>;
   saveLibraryBooks(books: Book[]): Promise<void>;
-  updateLibraryBook(book: Book): Promise<void>;
+  updateLibraryBooks(book: Book): Promise<void>;
   getCoverImageURL(book: Book): string;
 }
