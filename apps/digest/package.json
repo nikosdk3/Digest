@@ -14,8 +14,7 @@
     "copy-pdfjs-fonts": "dotenv -- cross-var cpx \"%PDFJS_FONTS_PATH%/{cmaps,standard_fonts}/*\" ./public/vendor/pdfjs",
     "copy-pdfjs-style": "dotenv -- cross-var cpx \"%PDFJS_STYLE_PATH%/{annotation_layer_builder,text_layer_builder}.css\" ./public/vendor/pdfjs",
     "copy-pdfjs": "pnpm copy-pdfjs-js && pnpm copy-pdfjs-fonts && pnpm copy-pdfjs-style",
-    "copy-pdfjs-to-foliate": "cpx \"./public/vendor/pdfjs/**/*\" ../../packages/foliate-js/vendor/pdfjs",
-    "setup-pdfjs": "pnpm build-pdfjs && pnpm prepare-public-vendor && pnpm copy-pdfjs && pnpm copy-pdfjs-to-foliate"
+    "setup-pdfjs": "pnpm build-pdfjs && pnpm prepare-public-vendor && pnpm copy-pdfjs"
   },
   "dependencies": {
     "@tauri-apps/api": "^2.5.0",
