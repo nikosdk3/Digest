@@ -35,14 +35,15 @@ const LibraryPage = () => {
           });
       });
     });
-  }, [envConfig]);
+  }, [envConfig, getAppService]);
 
   const importBooks = async (files: [string | File]) => {
     setLoading(true);
     for (const file of files) {
-      await appService?.importBook(file, libraryBooks)
+      await appService?.importBook(file, libraryBooks);
       setLibraryBooks(libraryBooks);
     }
+    appService?.saveLibraryBooks(libraryBooks);
     setLoading(false);
   };
 
