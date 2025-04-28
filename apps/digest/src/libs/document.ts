@@ -59,6 +59,7 @@ export class DocumentLoader {
 
   private async isZip(): Promise<boolean> {
     const arr = new Uint8Array(await this.file.slice(0, 4).arrayBuffer());
+    console.log(arr[0], arr[1], arr[2], arr[3]);
     return arr[0] === 0x50 && arr[1] === 0x4b && arr[2] === 0x03 && arr[3] === 0x04;
   }
 
