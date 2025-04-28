@@ -18,8 +18,8 @@ export const getCoverFilename = (book: Book) => {
 };
 
 export const getConfigFilename = (book: Book) => {
-  return `${book.hash}/config.json`
-}
+  return `${book.hash}/config.json`;
+};
 
 export const getBaseFilename = (filename: string) => {
   const normalizedPath = filename.replace(/\\/g, '/');
@@ -29,8 +29,4 @@ export const getBaseFilename = (filename: string) => {
 
 export const INIT_BOOK_CONFIG: BookConfig = {
   lastUpdated: 0,
-  remoteProgress: 0,
-  localProgress: 0,
-  bookmarks: [],
-  annotations: [],
-}
+};

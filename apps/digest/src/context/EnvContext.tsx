@@ -1,7 +1,7 @@
 'use client';
 
 import { createContext, useContext, useState } from 'react';
-import env, { EnvConfigType } from '../services/environment';
+import env, { EnvConfigType } from '@/services/environment';
 import { AppService } from '@/types/system';
 
 interface EnvContextType {

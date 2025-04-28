@@ -184,15 +184,7 @@ export abstract class BaseAppService implements AppService {
     return books;
   }
   async saveLibraryBooks(books: Book[]): Promise<void> {
-    await this.fs.writeFile(getLibraryFilename(), 'Books', JSON.stringify(books));
-  }
-
-  async updateLibraryBooks(book: Book): Promise<void> {
-    const library = await this.loadLibraryBooks();
-    const bookIndex = library.findIndex((b) => b.hash === book.hash);
-    if (bookIndex !== -1) {
-      library[bookIndex] = book;
-    }
-    await this.saveLibraryBooks(library);
+    const libraryBooks = books.map(({ coverImageUrl, ...rest }) => rest);
+    await this.fs.writeFile(getLibraryFilename(), 'Books', JSON.stringify(libraryBooks));
   }
 }
