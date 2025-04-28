@@ -6476,3 +6476,11 @@ dependencies = [
  "syn 2.0.100",
  "winnow 0.7.6",
 ]
+
+[[patch.unused]]
+name = "tauri"
+version = "2.5.1"
+
+[[patch.unused]]
+name = "wry"
+version = "0.46.1"
