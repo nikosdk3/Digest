@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 
-import { Book, BookConfig, BookContent, BookNote } from '@/types/book';
+import { Book, BookConfig, BookContent, BookNote, PageInfo } from '@/types/book';
 import { AppService } from '@/types/system';
 
 interface BookState {
@@ -18,7 +18,7 @@ interface ReaderStore {
 
   setLibrary: (books: Book[]) => void;
   fetchBook: (appService: AppService, id: string) => Promise<Book | null>;
-  setProgress: (id: string, progress: number, location: string, pageinfo: {}) => void;
+  setProgress: (id: string, progress: number, location: string, pageinfo: PageInfo) => void;
   addBookmark: (id: string, bookmark: BookNote) => void;
 }
 
@@ -63,7 +63,7 @@ export const useReaderStore = create<ReaderStore>((set) => ({
     }
   },
 
-  setProgress: (id: string, progress: number, location: string, pageinfo: {}) =>
+  setProgress: (id: string, progress: number, location: string, pageinfo: PageInfo) =>
     set((state) => {
       const book = state.books[id];
       if (!book) return state;

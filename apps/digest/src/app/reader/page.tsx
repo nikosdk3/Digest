@@ -33,7 +33,7 @@ const ReaderPage = () => {
     };
 
     fetchLibrary();
-  }, [setLibrary]);
+  }, [envConfig, setLibrary]);
 
   return (
     <div className='min-h-screen bg-gray-100'>

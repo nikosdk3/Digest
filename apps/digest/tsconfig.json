@@ -1,5 +1,5 @@
 {
-  "extends":"@sindresorhus/tsconfig",
+  "extends": "@sindresorhus/tsconfig",
   "compilerOptions": {
     "lib": ["dom", "dom.iterable", "esnext"],
     "allowJs": true,
@@ -19,7 +19,8 @@
       }
     ],
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "@pdfjs/*": ["./public/vendor/pdfjs/*"]
     }
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "next.config.mjs"],
